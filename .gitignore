@@ -1,0 +1,13 @@
+# Entornos y cachés de Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Secretos y datos clínicos: nunca subirlos a GitHub
+.streamlit/secrets.toml
+.env
+data/
+*.sqlite
+*.sqlite-*

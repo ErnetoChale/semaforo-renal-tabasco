@@ -1,6 +1,0 @@
-streamlit==1.56.0
-pandas==2.3.3
-altair==5.5.0
-reportlab==4.4.5
-cryptography==46.0.3
-qrcode==8.2
