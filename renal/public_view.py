@@ -1,7 +1,9 @@
 """Anonymous public calculator. Does not initialize or access the patient database."""
+import smtplib
 import streamlit as st
 from renal.domain import calculate_tyg
 from renal.branding import logo_img
+from renal.mailer import MAX_SENDS_PER_SESSION, mailto_link, send_result, valid_email
 from renal.sharing import public_calculator_url, qr_png
 
 PUBLIC_NOTE = "Este resultado es informativo. Por sí solo no diagnostica una enfermedad ni indica un tratamiento. Revísalo con un profesional de salud junto con tus estudios y antecedentes."
@@ -13,7 +15,38 @@ def clear_public_inputs():
             del st.session_state[key]
     st.session_state.public_generation = st.session_state.get("public_generation", 0) + 1
 
-def render_public():
+def result_text(tyg, glucose, tg):
+    return (f"Índice TyG\nResultado: {tyg:.4f}\nGlucosa en ayunas: {glucose:g} mg/dL\n"
+            f"Triglicéridos en ayunas: {tg:g} mg/dL\nFórmula: ln((triglicéridos × glucosa) / 2)\n\n{PUBLIC_NOTE}\n\n"
+            "Semáforo Renal Tabasco · Proyecto académico UJAT\n")
+
+def email_section(summary, generation, smtp):
+    """Envía el resultado al correo de la persona. La dirección no se guarda."""
+    with st.container(key="public-email"):
+        st.markdown("#### ✉️ Enviar a mi correo")
+        email = st.text_input("Tu correo electrónico (opcional)", key=f"public_email_{generation}", placeholder="nombre@correo.com",
+                              help="Solo se usa para enviarte este resultado. No se guarda ni se agrega a ningún expediente.")
+        if smtp is None:
+            st.link_button("Enviar a mi correo", mailto_link(email, summary), width="stretch")
+            st.caption("Se abrirá tu aplicación de correo con el resultado ya escrito; solo revisa el destinatario y pulsa Enviar.")
+            return
+        if st.button("Enviar a mi correo", key=f"public_send_{generation}", width="stretch"):
+            sends = st.session_state.get("mail_sends", 0)
+            if not valid_email(email):
+                st.error("Escribe un correo válido, por ejemplo nombre@correo.com.")
+            elif sends >= MAX_SENDS_PER_SESSION:
+                st.warning("Ya enviaste varios correos en esta sesión. Descarga tu resultado o inténtalo más tarde.")
+            else:
+                try:
+                    with st.spinner("Enviando…"):
+                        send_result(smtp, email, summary)
+                except (smtplib.SMTPException, OSError):
+                    st.error("No pudimos enviar el correo en este momento. Descarga tu resultado con el botón de arriba.")
+                else:
+                    st.session_state.mail_sends = sends + 1
+                    st.success(f"Listo. Enviamos tu resultado a {email.strip()}. Revisa también la carpeta de spam.")
+
+def render_public(smtp=None):
     st.markdown("""<style>
     [data-testid="stSidebar"],[data-testid="stSidebarCollapsedControl"]{display:none!important}
     .block-container{max-width:1080px;padding-top:3rem!important}
@@ -58,11 +91,13 @@ def render_public():
                 st.markdown("#### ¿Qué hago con este resultado?")
                 st.write("Puedes anotarlo y comentarlo en tu próxima consulta. Un profesional de salud puede interpretarlo junto con tus otros estudios.")
                 st.info(PUBLIC_NOTE)
-                st.download_button("Descargar mi resultado", f"Índice TyG\nResultado: {result['tyg']:.4f}\nGlucosa en ayunas: {glucose:g} mg/dL\nTriglicéridos en ayunas: {tg:g} mg/dL\nFórmula: ln((triglicéridos × glucosa) / 2)\n\n{PUBLIC_NOTE}\n".encode("utf-8"), file_name="mi_indice_tyg.txt", mime="text/plain", width="stretch")
+                summary = result_text(result["tyg"], glucose, tg)
+                st.download_button("Descargar mi resultado", summary.encode("utf-8"), file_name="mi_indice_tyg.txt", mime="text/plain", width="stretch")
+                email_section(summary, generation, smtp)
             else:
                 st.markdown(f'<div class="public-empty"><div class="public-illustration" aria-hidden="true">{logo_img("")}</div><div class="public-step">02 · TU RESULTADO</div><h2>Un poco más de claridad<br>sobre tus estudios.</h2><p>Completa los dos campos y pulsa <strong>Calcular mi índice TyG</strong>.<br>Tu resultado aparecerá aquí.</p></div>', unsafe_allow_html=True)
             st.button("Borrar mis datos y comenzar de nuevo", on_click=clear_public_inputs, width="stretch")
-        st.markdown('<div class="public-bottom"><strong>Tu consulta es personal.</strong> No pedimos nombre, correo ni teléfono. El cálculo se procesa durante esta sesión y no se agrega a los expedientes de la plataforma.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="public-bottom"><strong>Tu consulta es personal.</strong> No pedimos nombre ni teléfono, y el correo es opcional: solo se usa para enviarte el resultado. El cálculo se procesa durante esta sesión y no se agrega a los expedientes de la plataforma.</div>', unsafe_allow_html=True)
         with st.expander("¿Qué es el índice TyG y cómo se calcula?"):
             st.write("TyG es la abreviatura de triglicéridos y glucosa. Combina esos dos resultados de laboratorio en un valor numérico que se estudia como indicador metabólico.")
             st.latex(r"TyG=\ln\left(\frac{Triglicéridos\ (mg/dL)\times Glucosa\ (mg/dL)}{2}\right)")

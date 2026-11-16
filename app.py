@@ -20,6 +20,7 @@ from renal.reports import csv_bytes, pdf_bytes, safe_cell
 from renal.storage import Store
 from renal.public_view import render_public, render_sharing
 from renal.branding import LOGO_PNG, logo_img
+from renal.mailer import SmtpConfig
 
 ROOT = Path(__file__).parent
 public_view = st.query_params.get("vista", "publica") != "profesional"
@@ -238,7 +239,7 @@ def login_screen(store):
     st.stop()
 
 if public_view:
-    render_public()
+    render_public(SmtpConfig.from_settings(setting))
     st.stop()
 
 mode = setting("RENAL_MODE", "demo").strip().lower()

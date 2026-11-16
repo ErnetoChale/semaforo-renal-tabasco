@@ -6,7 +6,7 @@ Aplicación académica de la UJAT con una calculadora pública del índice TyG y
 
 La dirección principal abre la calculadora pública, sin iniciar sesión. Solo solicita glucosa y triglicéridos en ayunas, ambos en mg/dL. No pide nombre, edad, correo, teléfono, creatinina ni un expediente. El resultado es numérico e informativo; no aplica a la población general los cortes de la cohorte de hemodiálisis ni presenta una clasificación diagnóstica.
 
-Los valores se procesan en la sesión de Streamlit y no se escriben en la base de pacientes. Cada sesión comienza vacía y el botón **Borrar mis datos y comenzar de nuevo** elimina sus valores y resultado. La persona puede descargar un archivo de texto con su resultado. No se agregan valores clínicos a la dirección del navegador ni a los QR.
+Los valores se procesan en la sesión de Streamlit y no se escriben en la base de pacientes. Cada sesión comienza vacía y el botón **Borrar mis datos y comenzar de nuevo** elimina sus valores y resultado. La persona puede descargar un archivo de texto con su resultado o enviárselo por correo; la dirección es opcional y no se guarda. No se agregan valores clínicos a la dirección del navegador ni a los QR.
 
 El botón **Acceso profesional** lleva a `?vista=profesional`. El acceso profesional sigue las reglas del modo configurado: demostración temporal o autenticación para datos persistentes. La vista pública funciona incluso si el almacenamiento profesional no está configurado.
 
@@ -75,6 +75,7 @@ Configura estas variables de entorno o las mismas entradas en `.streamlit/secret
 | `RENAL_DB_KEY` | Clave Fernet que cifra los campos de pacientes y evaluaciones. Es obligatoria y debe mantenerse estable. |
 | `RENAL_SETUP_TOKEN` | Token privado para crear la primera cuenta administradora desde la pantalla inicial. Se usa únicamente mientras no existan usuarios. |
 | `RENAL_PUBLIC_URL` | Opcional. Dirección HTTPS definitiva del sitio para precargar el generador de QR. No puede ser una dirección local. |
+| `RENAL_SMTP_HOST`, `RENAL_SMTP_PORT`, `RENAL_SMTP_USER`, `RENAL_SMTP_PASSWORD`, `RENAL_SMTP_FROM` | Opcionales. Permiten que **Enviar a mi correo** mande el resultado público directamente. Sin ellos, el botón abre la aplicación de correo de la persona con el resultado ya escrito. La dirección no se guarda y cada sesión puede enviar hasta tres correos. |
 
 Genera los valores de forma local y guárdalos en el gestor de secretos del servidor:
 
@@ -137,6 +138,7 @@ renal/demo.py           Datos ficticios aislados
 renal/public_view.py    Calculadora anónima y pantalla de compartir
 renal/sharing.py        Enlace público y generación local del QR
 renal/branding.py       Logo compartido por ambas vistas
+renal/mailer.py         Envío opcional del resultado por correo
 assets/theme.css        Diseño adaptable (claro y oscuro)
 assets/logo.svg|png     Logo de la aplicación
 tests/                  Pruebas de servicios e interfaz
