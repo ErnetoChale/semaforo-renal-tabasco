@@ -36,6 +36,8 @@ Una dirección de desarrollo como `http://127.0.0.1:8501` no permite acceder des
 - Modo persistente con SQLite, cifrado de los datos de pacientes, autenticación y expedientes separados por cuenta.
 - Administración de cuentas, respaldo consistente de SQLite y registro de actividad sin nombres ni valores clínicos.
 - Diseño adaptable con colores, etiquetas textuales y estilos para pantallas pequeñas.
+- Apariencia de día y de noche: sigue el modo del dispositivo y se puede cambiar en ⋮ › Settings › Theme. Los temas se definen en `.streamlit/config.toml`.
+- Logo propio (riñón con semáforo) en `assets/logo.svg` y `assets/logo.png`.
 
 ## Ejecutar la demostración
 
@@ -134,6 +136,8 @@ renal/reports.py        Exportaciones PDF y CSV
 renal/demo.py           Datos ficticios aislados
 renal/public_view.py    Calculadora anónima y pantalla de compartir
 renal/sharing.py        Enlace público y generación local del QR
-assets/theme.css        Diseño adaptable
+renal/branding.py       Logo compartido por ambas vistas
+assets/theme.css        Diseño adaptable (claro y oscuro)
+assets/logo.svg|png     Logo de la aplicación
 tests/                  Pruebas de servicios e interfaz
 ```

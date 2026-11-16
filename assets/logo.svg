@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Semáforo Renal">
+  <defs>
+    <linearGradient id="k" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#17A3A0"/>
+      <stop offset="1" stop-color="#0B5F78"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(-3 0)">
+  <!-- Riñón: forma de frijol con el hilio hacia la izquierda -->
+  <path d="M37 4C50.8 4 60 16.2 60 32S50.8 60 37 60C26.5 60 20.6 53 22.3 45.4 23.3 40.9 27.4 38.6 27.4 32S23.3 23.1 22.3 18.6C20.6 11 26.5 4 37 4Z" fill="url(#k)"/>
+  <path d="M27 33C20.5 35 17.5 40 17.5 48" fill="none" stroke="#1592A0" stroke-width="3.4" stroke-linecap="round"/>
+  <!-- Semáforo -->
+  <rect x="34" y="13" width="15" height="38" rx="7.5" fill="#0A2233" opacity=".92"/>
+  <circle cx="41.5" cy="21.5" r="4.3" fill="#F0525B"/>
+  <circle cx="41.5" cy="32" r="4.3" fill="#F6B336"/>
+  <circle cx="41.5" cy="42.5" r="4.3" fill="#2FC07F"/>
+  </g>
+</svg>

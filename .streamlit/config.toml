@@ -3,3 +3,40 @@ headless = true
 
 [browser]
 gatherUsageStats = false
+
+[client]
+# Oculta las opciones de desarrollador; el menú ⋮ conserva "Settings" para cambiar el tema.
+toolbarMode = "viewer"
+
+# Opciones comunes a los dos temas
+[theme]
+font = "Plus Jakarta Sans:https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap, sans-serif"
+baseRadius = "0.75rem"
+showSidebarBorder = true
+
+# Apariencia de día. Con [theme.light] y [theme.dark] definidos, la app sigue
+# automáticamente la preferencia del dispositivo y permite cambiarla desde ⋮ › Settings.
+[theme.light]
+primaryColor = "#0E8A8F"
+backgroundColor = "#F5F8FA"
+secondaryBackgroundColor = "#E9F0F3"
+textColor = "#132538"
+borderColor = "#D6E1E8"
+linkColor = "#0B7480"
+
+[theme.light.sidebar]
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#EEF4F6"
+
+# Apariencia de noche
+[theme.dark]
+primaryColor = "#2BB8B2"
+backgroundColor = "#0D1620"
+secondaryBackgroundColor = "#16232F"
+textColor = "#E3ECF2"
+borderColor = "#24384A"
+linkColor = "#5FD3CB"
+
+[theme.dark.sidebar]
+backgroundColor = "#111D28"
+secondaryBackgroundColor = "#1A2937"

@@ -1,6 +1,7 @@
 """Anonymous public calculator. Does not initialize or access the patient database."""
 import streamlit as st
 from renal.domain import calculate_tyg
+from renal.branding import logo_img
 from renal.sharing import public_calculator_url, qr_png
 
 PUBLIC_NOTE = "Este resultado es informativo. Por sí solo no diagnostica una enfermedad ni indica un tratamiento. Revísalo con un profesional de salud junto con tus estudios y antecedentes."
@@ -14,13 +15,13 @@ def clear_public_inputs():
 
 def render_public():
     st.markdown("""<style>
-    [data-testid="stSidebar"],[data-testid="stSidebarCollapsedControl"],[data-testid="stToolbar"]{display:none!important}
-    .block-container{max-width:1080px;padding-top:2rem!important}
-    header[data-testid="stHeader"]{height:0;background:transparent}
+    [data-testid="stSidebar"],[data-testid="stSidebarCollapsedControl"]{display:none!important}
+    .block-container{max-width:1080px;padding-top:3rem!important}
+    header[data-testid="stHeader"]{background:transparent}
     </style>""", unsafe_allow_html=True)
     with st.container(key="public-page"):
-        st.markdown('<div class="public-topbar"><div class="public-brand"><span class="brand-mark">+</span><span><strong>Semáforo Renal</strong><small>TABASCO · UJAT</small></span></div><a href="?vista=profesional" target="_self">Acceso profesional ↗</a></div>', unsafe_allow_html=True)
-        st.markdown('<section class="public-hero"><span class="public-pill">PARA TI · SIN REGISTRO</span><h1>Conoce tu índice <span>TyG.</span></h1><p>Usa los resultados de glucosa y triglicéridos de tu laboratorio.<br>Dos datos, un cálculo y una explicación sencilla.</p><div class="public-trust">Sin nombre ni cuenta · Tus resultados no se guardan en un expediente</div></section>', unsafe_allow_html=True)
+        st.markdown(f'<div class="public-topbar"><div class="public-brand">{logo_img()}<span><strong>Semáforo Renal</strong><small>TABASCO · UJAT</small></span></div><a href="?vista=profesional" target="_self">Acceso profesional ↗</a></div>', unsafe_allow_html=True)
+        st.markdown('<section class="public-hero"><span class="public-pill">PARA TI · SIN REGISTRO</span><h1>Conoce tu índice <span>TyG.</span></h1><p>Usa los resultados de glucosa y triglicéridos de tu laboratorio.<br>Dos datos, un cálculo y una explicación sencilla.</p><div class="public-trust"><span>🔒 Sin nombre ni cuenta</span><span>🗂️ No se guarda en expedientes</span><span>⏱️ Menos de un minuto</span></div></section>', unsafe_allow_html=True)
         left, right = st.columns([1.15, 1], gap="large")
         generation = st.session_state.get("public_generation", 0)
         with left:
@@ -59,7 +60,7 @@ def render_public():
                 st.info(PUBLIC_NOTE)
                 st.download_button("Descargar mi resultado", f"Índice TyG\nResultado: {result['tyg']:.4f}\nGlucosa en ayunas: {glucose:g} mg/dL\nTriglicéridos en ayunas: {tg:g} mg/dL\nFórmula: ln((triglicéridos × glucosa) / 2)\n\n{PUBLIC_NOTE}\n".encode("utf-8"), file_name="mi_indice_tyg.txt", mime="text/plain", width="stretch")
             else:
-                st.markdown('<div class="public-empty"><div class="public-illustration" aria-hidden="true"><span>TyG</span><i>+</i></div><div class="public-step">02 · TU RESULTADO</div><h2>Un poco más de claridad<br>sobre tus estudios.</h2><p>Completa los dos campos y pulsa <strong>Calcular mi índice TyG</strong>.<br>Tu resultado aparecerá aquí.</p></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="public-empty"><div class="public-illustration" aria-hidden="true">{logo_img("")}</div><div class="public-step">02 · TU RESULTADO</div><h2>Un poco más de claridad<br>sobre tus estudios.</h2><p>Completa los dos campos y pulsa <strong>Calcular mi índice TyG</strong>.<br>Tu resultado aparecerá aquí.</p></div>', unsafe_allow_html=True)
             st.button("Borrar mis datos y comenzar de nuevo", on_click=clear_public_inputs, width="stretch")
         st.markdown('<div class="public-bottom"><strong>Tu consulta es personal.</strong> No pedimos nombre, correo ni teléfono. El cálculo se procesa durante esta sesión y no se agrega a los expedientes de la plataforma.</div>', unsafe_allow_html=True)
         with st.expander("¿Qué es el índice TyG y cómo se calcula?"):
@@ -68,6 +69,7 @@ def render_public():
             st.write(PUBLIC_NOTE)
             st.markdown(f"[Consultar una publicación que describe esta fórmula]({TYG_REFERENCE})")
         st.caption("Semáforo Renal Tabasco · Proyecto académico UJAT · Información para acompañar tu consulta de salud.")
+        st.markdown('<div class="public-theme-hint">🌓 La página sigue el modo claro u oscuro de tu dispositivo. También puedes cambiarlo en el menú ⋮ › Settings › Theme.</div>', unsafe_allow_html=True)
 
 def render_sharing(default_url=""):
     st.title("Compartir calculadora")

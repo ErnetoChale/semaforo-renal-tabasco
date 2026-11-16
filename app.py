@@ -19,10 +19,11 @@ from renal.domain import Inputs, METHOD_NOTE, METHOD_VERSION, STRATA, TYG_CUTOFF
 from renal.reports import csv_bytes, pdf_bytes, safe_cell
 from renal.storage import Store
 from renal.public_view import render_public, render_sharing
+from renal.branding import LOGO_PNG, logo_img
 
 ROOT = Path(__file__).parent
 public_view = st.query_params.get("vista", "publica") != "profesional"
-st.set_page_config(page_title="Calcula tu índice TyG · Semáforo Renal" if public_view else "Semáforo Renal · Tabasco", page_icon="🩺", layout="wide", initial_sidebar_state="collapsed" if public_view else "expanded")
+st.set_page_config(page_title="Calcula tu índice TyG · Semáforo Renal" if public_view else "Semáforo Renal · Tabasco", page_icon=str(LOGO_PNG), layout="wide", initial_sidebar_state="collapsed" if public_view else "expanded")
 st.markdown(f"<style>{(ROOT / 'assets/theme.css').read_text(encoding='utf-8')}</style>", unsafe_allow_html=True)
 
 def setting(name, default=""):
@@ -187,9 +188,9 @@ def chart(evaluations, field, label, color, cutoff_key=None):
     points = base.mark_circle(color=color, size=85, opacity=1)
     layers = line + points
     if cutoff_key:
-        rule = alt.Chart(df).mark_rule(color="#69788D", strokeDash=[6, 4]).encode(y="Corte:Q", tooltip=[alt.Tooltip("Corte:Q", title="Corte de la cohorte")])
+        rule = alt.Chart(df).mark_rule(color="#8A98A8", strokeDash=[6, 4]).encode(y="Corte:Q", tooltip=[alt.Tooltip("Corte:Q", title="Corte de la cohorte")])
         layers = layers + rule
-    st.altair_chart(layers.properties(height=230).configure_view(stroke=None).configure_axis(gridColor="#e8edf4", labelColor="#52657a", titleColor="#52657a"), width='stretch')
+    st.altair_chart(layers.properties(height=230).configure_view(stroke=None), width='stretch')
 
 def login_screen(store):
     hero("SEMÁFORO RENAL · TABASCO", "Un espacio para el seguimiento integral.", "Organiza evaluaciones y explora la evolución metabólico-muscular con una mirada más clara.", "ACCESO A TU ESPACIO DE TRABAJO")
@@ -274,7 +275,7 @@ else:
     st.session_state.last_activity = time.time()
 
 with st.sidebar:
-    st.markdown('<div class="sidebar-brand"><div class="brand-mark">+</div><div><div class="brand-name">Semáforo Renal</div><div class="eyebrow">TABASCO · UJAT</div></div></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="sidebar-brand">{logo_img()}<div><div class="brand-name">Semáforo Renal</div><div class="eyebrow">TABASCO · UJAT <span class="brand-lights"><i></i><i></i><i></i></span></div></div></div>', unsafe_allow_html=True)
     pages = ["Inicio", "Nueva evaluación", "Pacientes", "Seguimiento", "Historial", "Compartir calculadora", "Metodología", "Mi cuenta"]
     if user["role"] == "admin":
         pages.append("Administración")
