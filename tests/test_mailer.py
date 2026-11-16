@@ -39,8 +39,9 @@ def result_app(monkeypatch, smtp=False):
     at = AppTest.from_file(APP, default_timeout=30).run()
     at.number_input[0].set_value(110.)
     at.number_input[1].set_value(180.)
+    at.number_input[2].set_value(7.2)
     at.checkbox[0].check()
-    next(b for b in at.button if b.label == "Calcular mi índice TyG").click().run()
+    next(b for b in at.button if b.label == "Ver mi semáforo").click().run()
     return at
 
 def test_without_smtp_offers_mail_app_link(monkeypatch):
@@ -57,7 +58,7 @@ def test_with_smtp_sends_once_and_does_not_store_address(monkeypatch):
     next(b for b in at.button if b.label == "Enviar a mi correo").click().run()
     assert not at.exception
     assert at.success
-    assert sent and sent[0][0] == "persona@correo.com" and "Resultado: 9.2" in sent[0][1]
+    assert sent and sent[0][0] == "persona@correo.com" and "Índice TyG: 9.2" in sent[0][1] and "Sarcopenia metabólica" in sent[0][1]
     assert "store" not in at.session_state
 
 def test_with_smtp_invalid_address_shows_error(monkeypatch):

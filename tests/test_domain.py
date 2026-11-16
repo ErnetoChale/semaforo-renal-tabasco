@@ -31,3 +31,12 @@ def test_rounding_does_not_change_classification():
     assert classify(8.799999, 8.4) == "nutrition"
     assert "inferior" in precision_note(8.799999, 8.8, 3)
 
+
+
+def test_traffic_light_content_is_complete():
+    from renal.domain import LINKS, STRATA, TYG_BANDS, tyg_band
+    assert [s["light"] for s in STRATA.values()] == ["Rojo", "Naranja", "Amarillo", "Verde"]
+    for info in [*STRATA.values(), *TYG_BANDS.values()]:
+        assert info["meaning"] and info["risks"] and info["actions"] and info["links"]
+        assert all(k in LINKS and LINKS[k][2].startswith("https://") for k in info["links"])
+    assert tyg_band(8.49) == "green" and tyg_band(8.5) == "yellow" and tyg_band(8.8) == "red"

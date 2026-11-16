@@ -4,7 +4,12 @@ Aplicación académica de la UJAT con una calculadora pública del índice TyG y
 
 ## Entrada pública para pacientes y visitantes
 
-La dirección principal abre la calculadora pública, sin iniciar sesión. Solo solicita glucosa y triglicéridos en ayunas, ambos en mg/dL. No pide nombre, edad, correo, teléfono, creatinina ni un expediente. El resultado es numérico e informativo; no aplica a la población general los cortes de la cohorte de hemodiálisis ni presenta una clasificación diagnóstica.
+La dirección principal abre la calculadora pública, sin iniciar sesión. Primero pregunta si la persona recibe hemodiálisis:
+
+- **Sí:** pide glucosa, triglicéridos y creatinina prediálisis (mg/dL) y muestra el **Semáforo Renal de 4 luces** (roja: sarcopenia metabólica; naranja: desgaste nutricional; amarilla: obesidad muscular / riesgo cardiometabólico; verde: músculo protegido).
+- **No:** pide glucosa y triglicéridos y muestra un **semáforo orientativo del TyG** de 3 luces (menor de 8.5, de 8.5 a 8.79 y 8.8 o más), aclarando que no existe un punto de corte universal.
+
+Cada resultado explica en lenguaje sencillo qué puede implicar, qué riesgos podrían aumentar si continúa así, qué puede hacer la persona y enlaza artículos de divulgación en español (NIDDK, National Kidney Foundation y MedlinePlus). No pide nombre, edad, teléfono ni expediente; el resultado es informativo y no constituye un diagnóstico.
 
 Los valores se procesan en la sesión de Streamlit y no se escriben en la base de pacientes. Cada sesión comienza vacía y el botón **Borrar mis datos y comenzar de nuevo** elimina sus valores y resultado. La persona puede descargar un archivo de texto con su resultado o enviárselo por correo; la dirección es opcional y no se guarda. No se agregan valores clínicos a la dirección del navegador ni a los QR.
 
@@ -113,7 +118,7 @@ Versión del método: `cohorte-1.0`. La versión 2.0 corresponde a la aplicació
 - La igualdad pertenece al grupo superior. La clasificación utiliza valores completos; los reportes indican los cortes y la versión guardados en cada evaluación.
 - Los nombres de los patrones describen la posición frente a los cortes; no constituyen diagnósticos ni implican ausencia de riesgo.
 
-**Pendiente del equipo responsable del estudio:** referencia bibliográfica, tamaño y descripción de la cohorte, criterios de inclusión, fechas y validación externa. El repositorio original no aporta esos datos. No se ha inventado una cita ni se ha declarado validez clínica de la herramienta. La sección Metodología y los PDF hacen explícita esta limitación. Antes de utilizarla para decisiones clínicas se requiere revisión del equipo responsable.
+**Cohorte de referencia: 82 adultos con enfermedad renal crónica estadio 5 (KDIGO) en hemodiálisis intermitente tres veces por semana, de un hospital de referencia de Villahermosa, Tabasco (mayo a agosto de 2025). Los cortes son las medianas de la cohorte. Pendiente: validación externa en otras unidades. Antes de utilizarla para decisiones clínicas se requiere revisión del equipo responsable. Los enlaces de divulgación se verificaron en noviembre de 2026 y están en `renal/domain.py` (`LINKS`).
 
 Editar una evaluación recalcula con el método actual y aumenta su revisión; los cambios de identificación del paciente no alteran las identificaciones guardadas en reportes anteriores. El registro de actividad guarda autor, tipo de acción, recurso y fecha; no conserva una copia de todas las revisiones previas de los valores.
 
@@ -138,6 +143,7 @@ renal/demo.py           Datos ficticios aislados
 renal/public_view.py    Calculadora anónima y pantalla de compartir
 renal/sharing.py        Enlace público y generación local del QR
 renal/branding.py       Logo compartido por ambas vistas
+renal/semaforo_view.py  Semáforo visual, riesgos, acciones y enlaces
 renal/mailer.py         Envío opcional del resultado por correo
 assets/theme.css        Diseño adaptable (claro y oscuro)
 assets/logo.svg|png     Logo de la aplicación

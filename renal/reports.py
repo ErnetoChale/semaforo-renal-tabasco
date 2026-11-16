@@ -8,7 +8,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-from renal.domain import METHOD_NOTE, STRATA
+from renal.domain import METHOD_NOTE, STRATA, light_name
 
 CSV_FIELDS = ["Evaluación ID", "Paciente ID", "Paciente", "Sexo", "Fecha", "Edad", "Glucosa (mg/dL)", "Triglicéridos (mg/dL)", "Creatinina prediálisis (mg/dL)", "Peso postdiálisis (kg)", "Talla (cm)", "TyG", "IMC (kg/m²)", "Patrón", "Corte TyG", "Corte creatinina (mg/dL)", "Versión del método", "Revisión", "Archivada", "Creada UTC", "Actualizada UTC"]
 
@@ -37,7 +37,7 @@ def pdf_bytes(evaluation):
     styles.add(ParagraphStyle("SmallRenal", parent=styles["BodyText"], fontSize=8, leading=11, textColor=colors.HexColor("#526174")))
     styles.add(ParagraphStyle("Stratum", parent=styles["Heading2"], textColor=colors.HexColor(stratum["color"])))
     para = lambda value, style="BodyText": Paragraph(escape(str(value)), styles[style])
-    story = [para("SEMÁFORO RENAL", "Brand"), para("TABASCO · REPORTE ACADÉMICO DE EVALUACIÓN", "SmallRenal"), Spacer(1, 16), para(stratum["title"], "Stratum"), para(stratum["detail"]), Spacer(1, 12)]
+    story = [para("SEMÁFORO RENAL", "Brand"), para("TABASCO · REPORTE ACADÉMICO DE EVALUACIÓN", "SmallRenal"), Spacer(1, 16), para(f'Luz {light_name(stratum)} · {stratum["title"]}', "Stratum"), para(stratum["detail"]), para(f'Acción sugerida: {stratum["clinical_action"]}'), Spacer(1, 6), para(stratum.get("risks_title", "Si continúa así, podría aumentar el riesgo de") + ":"), *[para(f"• {x}") for x in stratum["risks"]], Spacer(1, 12)]
     rows = [
         ["Paciente", p["name"]], ["Identificador del paciente", e["patient_id"]],
         ["Evaluación", e["id"]], ["Fecha de evaluación", e["evaluated_on"]],

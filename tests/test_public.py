@@ -16,16 +16,21 @@ def public_app(monkeypatch):
     monkeypatch.setenv("RENAL_DB_KEY", "")
     return AppTest.from_file(APP, default_timeout=30).run()
 
-def fill(at, glucose=110., triglycerides=180.):
+def fill(at, glucose=110., triglycerides=180., creatinine=7.2):
+    if creatinine is None:
+        at.radio[0].set_value("No").run()
     at.number_input[0].set_value(glucose)
     at.number_input[1].set_value(triglycerides)
+    if creatinine is not None:
+        at.number_input[2].set_value(creatinine)
     at.checkbox[0].check()
-    next(b for b in at.button if b.label == "Calcular mi índice TyG").click().run()
+    next(b for b in at.button if b.label == "Ver mi semáforo").click().run()
 
 def test_default_entry_is_public_without_identity_or_database(monkeypatch):
     at = public_app(monkeypatch)
     assert not at.exception
-    assert len(at.number_input) == 2
+    assert len(at.number_input) == 3  # glucosa, triglicéridos y creatinina (hemodiálisis por defecto)
+    assert at.radio[0].value == "Sí, estoy en hemodiálisis"
     assert all(w.value is None for w in at.number_input)
     assert not at.text_input
     assert not at.sidebar.radio
@@ -33,24 +38,53 @@ def test_default_entry_is_public_without_identity_or_database(monkeypatch):
     assert "user" not in at.session_state
     assert not at.error
 
-def test_public_calculation_does_not_store_or_classify(monkeypatch):
+def test_public_hemodialysis_result_is_traffic_light_with_guidance(monkeypatch):
     at = public_app(monkeypatch)
     fill(at)
     assert not at.exception
     result = at.session_state["public_result"]
     assert result["tyg"] == pytest.approx(math.log(9900))
-    assert "stratum" not in result
+    assert result["light"] == "muscular"  # TyG 9.20 >= 8.8 y creatinina 7.2 < 8.5
     assert "store" not in at.session_state
-    assert "8.8" not in " ".join(m.value for m in at.markdown)
+    html = " ".join(m.value for m in at.markdown)
+    assert "tl-housing" in html and "lamp on" in html
+    assert "Sarcopenia metabólica" in html and "LUZ ROJA" in html
+    assert "podría aumentar el riesgo" in html
+    assert "kidney.org/es/temas-del-rinon" in html and 'target="_blank"' in html
+
+@pytest.mark.parametrize("glucose,tg,creat,light", [
+    (110, 180, 7.2, "muscular"), (85, 90, 7.0, "nutrition"), (110, 180, 10.0, "metabolic"), (85, 90, 10.0, "reference")])
+def test_public_four_phenotypes(monkeypatch, glucose, tg, creat, light):
+    at = public_app(monkeypatch)
+    fill(at, glucose, tg, creat)
+    assert at.session_state["public_result"]["light"] == light
+
+@pytest.mark.parametrize("glucose,tg,band", [(85, 90, "green"), (95, 120, "yellow"), (110, 180, "red")])
+def test_public_general_tyg_traffic_light(monkeypatch, glucose, tg, band):
+    at = public_app(monkeypatch)
+    fill(at, glucose, tg, creatinine=None)
+    assert not at.exception
+    assert len(at.number_input) == 2
+    result = at.session_state["public_result"]
+    assert result["light"] == band and result["inputs"]["creatinine"] is None
+    assert "No existe un punto de corte universal" in " ".join(c.value for c in at.caption)
+
+def test_hemodialysis_requires_creatinine(monkeypatch):
+    at = public_app(monkeypatch)
+    at.number_input[0].set_value(110.)
+    at.number_input[1].set_value(180.)
+    at.checkbox[0].check()
+    next(b for b in at.button if b.label == "Ver mi semáforo").click().run()
+    assert at.error and "public_result" not in at.session_state
 
 def test_public_validation_stale_result_and_clear(monkeypatch):
     at = public_app(monkeypatch)
-    next(b for b in at.button if b.label == "Calcular mi índice TyG").click().run()
+    next(b for b in at.button if b.label == "Ver mi semáforo").click().run()
     assert at.error
     fill(at)
     assert "public_result" in at.session_state
     at.checkbox[0].uncheck()
-    next(b for b in at.button if b.label == "Calcular mi índice TyG").click().run()
+    next(b for b in at.button if b.label == "Ver mi semáforo").click().run()
     assert "public_result" not in at.session_state
     assert at.error
     fill(at)
@@ -90,4 +124,4 @@ def test_explicit_public_route_ignores_professional_state(monkeypatch):
     at.run()
     assert not at.exception
     assert not at.sidebar.radio
-    assert len(at.number_input) == 2
+    assert len(at.number_input) == 3

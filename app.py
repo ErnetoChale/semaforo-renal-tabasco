@@ -15,12 +15,13 @@ import streamlit as st
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from renal.demo import make_demo
-from renal.domain import Inputs, METHOD_NOTE, METHOD_VERSION, STRATA, TYG_CUTOFF, CREATININE_CUTOFF, calculate, precision_note
+from renal.domain import COHORT_NOTE, Inputs, light_name, METHOD_NOTE, METHOD_VERSION, STRATA, TYG_CUTOFF, CREATININE_CUTOFF, calculate, precision_note
 from renal.reports import csv_bytes, pdf_bytes, safe_cell
 from renal.storage import Store
 from renal.public_view import render_public, render_sharing
 from renal.branding import LOGO_PNG, logo_img
 from renal.mailer import SmtpConfig
+from renal.semaforo_view import guide, result_card
 
 ROOT = Path(__file__).parent
 public_view = st.query_params.get("vista", "publica") != "profesional"
@@ -84,7 +85,11 @@ def patient_header(patient):
 def result_panel(record, previous=None):
     r, i = record["result"], record["inputs"]
     s = STRATA[r["stratum"]]
-    st.markdown(f'<div class="result-banner" style="--accent:{s["color"]};--tint:{s["background"]}"><div class="eyebrow">PATRÓN {s["symbol"]} · {escape(s["label"])}</div><h2>{escape(s["title"])}</h2><p>{escape(s["detail"])}</p></div>', unsafe_allow_html=True)
+    metrics = f'<div class="tl-metrics"><span>TyG <b>{r["tyg"]:.2f}</b></span><span>Creatinina <b>{i["creatinine"]:g}</b> mg/dL</span></div>'
+    st.markdown(result_card(list(STRATA.items()), r["stratum"], f'FENOTIPO {s["symbol"]}', metrics), unsafe_allow_html=True)
+    st.markdown(f'**Acción sugerida para el equipo clínico:** {s["clinical_action"]}')
+    with st.expander("Orientación para compartir con el paciente: riesgos, qué hacer y lecturas"):
+        guide(s)
     with st.container(key="result-metrics"):
         cols = st.columns(3)
         metrics = [("Índice TyG", r["tyg"], 3, None, "tyg"), ("Creatinina prediálisis", i["creatinine"], 2, "mg/dL", "creatinine"), ("IMC", r["bmi"], 1, "kg/m²", "bmi")]
@@ -454,11 +459,13 @@ elif page == "Metodología":
     st.latex(r"TyG=\ln\left(\frac{Triglicéridos\ (mg/dL)\times Glucosa\ (mg/dL)}{2}\right)")
     st.latex(r"IMC=\frac{Peso\ postdiálisis\ (kg)}{Talla\ (m)^2}")
     st.write("Los valores iguales al corte se incluyen en el grupo superior. Los cálculos utilizan todos los decimales; el redondeo solo afecta a la presentación.")
+    st.subheader("Semáforo Renal: cuatro fenotipos")
     for s in STRATA.values():
-        st.markdown(f'**{s["symbol"]}. {s["title"]}**')
-        st.write(s["detail"])
-    st.subheader("Documentación pendiente del estudio")
-    st.write("El repositorio original no incluye una referencia bibliográfica verificable, tamaño y descripción de la cohorte, criterios de inclusión, fecha del estudio ni validación externa. Estos datos deben completarse por el equipo responsable antes de sostener afirmaciones de validez clínica.")
+        st.markdown(f'<div class="tl-chip on" style="--lamp:{s["color"]}"><i></i>Luz {light_name(s)} · {s["symbol"]}. {escape(s["title"])}</div>', unsafe_allow_html=True)
+        st.write(f'{s["detail"]} **Acción sugerida:** {s["clinical_action"]}')
+    st.subheader("Cohorte de referencia")
+    st.write(COHORT_NOTE + " Diseño observacional, transversal y analítico. Se excluyeron pacientes con hospitalización por evento agudo en los últimos tres meses, enfermedades consuntivas activas, amputación mayor o función renal residual significativa. Las muestras se tomaron antes de la sesión intermedia semanal, con ayuno mínimo de ocho horas.")
+    st.write("Pendiente: validación externa en otras unidades de hemodiálisis antes de sostener afirmaciones de validez clínica.")
     st.subheader("Registro y trazabilidad")
     st.write("Cada evaluación guarda valores originales, identificación al momento del registro, versión del método, cortes aplicados, revisión y marcas de tiempo. El CSV exporta todos esos campos. El modo persistente registra las acciones de creación, corrección, archivo y restauración.")
 
