@@ -65,7 +65,7 @@ def render_public(smtp=None):
     </style>""", unsafe_allow_html=True)
     with st.container(key="public-page"):
         st.markdown(f'<div class="public-topbar"><div class="public-brand">{logo_img()}<span><strong>Semáforo Renal</strong><small>TABASCO · UJAT</small></span></div><a href="?vista=profesional" target="_self">Acceso profesional ↗</a></div>', unsafe_allow_html=True)
-        st.markdown('<section class="public-hero"><span class="public-pill">PARA TI · SIN REGISTRO</span><h1>Tu <span>Semáforo Renal.</span></h1><p>Con tus estudios de glucosa, triglicéridos y creatinina te mostramos, en colores,<br>cómo está tu perfil metabólico y muscular, qué puede implicar y qué puedes hacer.</p><div class="public-trust"><span>🔒 Sin nombre ni cuenta</span><span>🗂️ No se guarda en expedientes</span><span>⏱️ Menos de un minuto</span></div></section>', unsafe_allow_html=True)
+        st.markdown('<section class="public-hero"><span class="public-pill">PARA TI · SIN REGISTRO</span><h1>Tu <span>Semáforo Renal.</span></h1><p>Con tus estudios de glucosa, triglicéridos y creatinina te mostramos, en colores, cómo está tu perfil metabólico y muscular, qué puede implicar y qué puedes hacer.</p><div class="public-trust"><span>🔒 Sin nombre ni cuenta</span><span>🗂️ No se guarda en expedientes</span><span>⏱️ Menos de un minuto</span></div></section>', unsafe_allow_html=True)
         generation = st.session_state.get("public_generation", 0)
         left, right = st.columns([1.05, 1], gap="large")
         with left:
